@@ -20,7 +20,7 @@ public class ContaBancariaRepositoryTest {
     @Test
     public void adicionarUsuarioComSucesso() {
 
-        repository.adicionarUsuario(usuario);
+        repository.salvar(usuario);
 
         assertEquals(1, repository.buscarTodosUsuarios().size());
 
@@ -29,7 +29,7 @@ public class ContaBancariaRepositoryTest {
     @Test
     public void buscarUsuarioPelaIDComSucesso() {
 
-        repository.adicionarUsuario(usuario);
+        repository.salvar(usuario);
 
         Long buscarID = (long) 1;
 
@@ -39,9 +39,9 @@ public class ContaBancariaRepositoryTest {
     @Test
     public void buscarTodosOsUsuariosComSucesso() {
 
-        repository.adicionarUsuario(new ContaBancaria("Anny"));
-        repository.adicionarUsuario(new ContaBancaria("Leo"));
-        repository.adicionarUsuario(usuario);
+        repository.salvar(new ContaBancaria("Anny"));
+        repository.salvar(new ContaBancaria("Leo"));
+        repository.salvar(usuario);
 
         assertEquals(3, repository.buscarTodosUsuarios().size());
     }

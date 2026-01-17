@@ -26,19 +26,18 @@ public class ContaBancariaServiceTest {
     @DisplayName("Verifica se foi salvo usuario com sucesso")
     void adicionarUsuarioComSucesso() {
 
-        service.adicionarUsuario(usuario);
+        service.criarConta(usuario);
 
-        assertEquals(1, service.buscarTodosUsuarios().size());
+        assertEquals(1, service.buscarTodos().size());
     }
 
     @Test
     @DisplayName("Verifica se foi encontado o usuario pelo ID")
     void buscarUsuarioPelaIDComSucesso() {
 
-        ResponseDTO usuarioSalvo = service.adicionarUsuario(usuario);
+        ResponseDTO usuarioSalvo = service.criarConta(usuario);
 
-        assertEquals(usuarioSalvo.getId(),
-                service.buscarUsuarioPelaID(usuarioSalvo.getId()).getId());
+        assertEquals(usuarioSalvo.getId(), service.buscarPorId(usuarioSalvo.getId()).getId());
 
     }
 
@@ -46,10 +45,10 @@ public class ContaBancariaServiceTest {
     @DisplayName("Verifica se retornou todos os usuarios")
     void buscarTodosUsuarios() {
 
-        service.adicionarUsuario(new RequestDTO("Anny"));
-        service.adicionarUsuario(new RequestDTO("Leo"));
+        service.criarConta(new RequestDTO("Anny"));
+        service.criarConta(new RequestDTO("Leo"));
 
-        assertEquals(repository.buscarTodosUsuarios().size(), service.buscarTodosUsuarios().size());
+        assertEquals(repository.buscarTodosUsuarios().size(), service.buscarTodos().size());
     }
 
 }
