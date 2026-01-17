@@ -13,11 +13,14 @@ public class ContaBancariaRepositoryImpl implements ContaBancariaRepository {
 
 
     @Override
-    public void adicionarUsuario(ContaBancaria usuario) {
+    public ContaBancaria adicionarUsuario(ContaBancaria usuario) {
 
         // adiciona o ID no o objeto antes de salvar
         usuario.setIDapenasPeloRepository(contador.incrementAndGet());
+
         bancoDeDadosInMemoria.add(usuario);
+
+        return usuario;
     }
 
     @Override

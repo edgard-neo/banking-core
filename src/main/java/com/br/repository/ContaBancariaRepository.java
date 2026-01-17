@@ -5,7 +5,7 @@ import com.br.domain.ContaBancaria;
 
 public interface ContaBancariaRepository {
 
-    void adicionarUsuario(ContaBancaria usuario);
+    ContaBancaria adicionarUsuario(ContaBancaria usuario);
 
     ContaBancaria buscarUsuarioPelaID(Long id);
 

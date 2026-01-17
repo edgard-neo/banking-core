@@ -2,6 +2,9 @@ package com.br.service;
 
 import java.util.Set;
 import com.br.domain.ContaBancaria;
+import com.br.dto.RequestDTO;
+import com.br.dto.ResponseDTO;
+import com.br.mapper.ContaBancariaMapper;
 import com.br.repository.ContaBancariaRepository;
 
 
@@ -14,15 +17,27 @@ public class ContaBancariaService {
     }
 
 
-    public void adicionarUsuario(ContaBancaria usuario) {
+    public ResponseDTO adicionarUsuario(RequestDTO request) {
 
-        repository.adicionarUsuario(usuario);
+        if (request.getNome().isBlank()) {
+            throw new IllegalArgumentException("Nome não Pode estar Vazio");
+        }
+
+        ContaBancaria usuario = ContaBancariaMapper.toEntity(request);
+
+        return ContaBancariaMapper.toResponse(repository.adicionarUsuario(usuario));
     }
 
 
-    public ContaBancaria buscarUsuarioPelaID(Long id) {
+    public ResponseDTO buscarUsuarioPelaID(Long id) {
 
-        return repository.buscarUsuarioPelaID(id);
+        if (id == null) {
+            throw new IllegalArgumentException("Id não pode esta vazio");
+        }
+
+        ContaBancaria usuarioEncontrado = repository.buscarUsuarioPelaID(id);
+
+        return ContaBancariaMapper.toResponse(usuarioEncontrado);
     }
 
 
