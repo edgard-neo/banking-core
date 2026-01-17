@@ -4,19 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.br.domain.ContaBancaria;
+import com.br.dto.RequestDTO;
+import com.br.dto.ResponseDTO;
 import com.br.repository.ContaBancariaRepository;
 import com.br.repository.ContaBancariaRepositoryImpl;
 
 public class ContaBancariaServiceTest {
 
-    ContaBancaria usuario;
+    RequestDTO usuario;
     ContaBancariaService service;
     ContaBancariaRepository repository;
 
     @BeforeEach
     void setUp() {
-        usuario = new ContaBancaria("Edgar");
+        usuario = new RequestDTO("Edgar");
         repository = new ContaBancariaRepositoryImpl();
         service = new ContaBancariaService(repository);
     }
@@ -34,9 +35,10 @@ public class ContaBancariaServiceTest {
     @DisplayName("Verifica se foi encontado o usuario pelo ID")
     void buscarUsuarioPelaIDComSucesso() {
 
-        service.adicionarUsuario(usuario);
+        ResponseDTO usuarioSalvo = service.adicionarUsuario(usuario);
 
-        assertEquals(usuario, service.buscarUsuarioPelaID(usuario.getId()));
+        assertEquals(usuarioSalvo.getId(),
+                service.buscarUsuarioPelaID(usuarioSalvo.getId()).getId());
 
     }
 
@@ -44,8 +46,8 @@ public class ContaBancariaServiceTest {
     @DisplayName("Verifica se retornou todos os usuarios")
     void buscarTodosUsuarios() {
 
-        service.adicionarUsuario(new ContaBancaria("Anny"));
-        service.adicionarUsuario(new ContaBancaria("Leo"));
+        service.adicionarUsuario(new RequestDTO("Anny"));
+        service.adicionarUsuario(new RequestDTO("Leo"));
 
         assertEquals(repository.buscarTodosUsuarios().size(), service.buscarTodosUsuarios().size());
     }
