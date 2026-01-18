@@ -1,108 +1,91 @@
-# Sistema Bancário Simplificado - Core de Domínio
+# Sistema Bancário Simplificado
 
-Projeto desenvolvido como desafio técnico para demonstrar boas práticas de arquitetura de software, modelagem de domínio e escrita de código limpo em Java puro.
+## O que é isso?
 
-O objetivo não é simular uma aplicação completa com API REST ou persistência, mas construir um **núcleo de domínio sólido**, isolado de infraestrutura, onde as regras de negócio são o centro de tudo.
+Um sistema bancário básico feito em Java puro. A ideia era entender melhor como estruturar um domínio de negócio de verdade, sem ficar dependendo de frameworks pra fazer tudo.
 
-## Problema Proposto
+Não tem API REST nem banco de dados aqui. O foco foi construir o **core do sistema** com as regras de negócio bem organizadas e testadas. Tipo, antes de sair fazendo Spring Boot e PostgreSQL, quis entender como as coisas funcionam por baixo.
 
-Construir o core de um sistema bancário simples para uma fintech, com as seguintes operações principais:
+## O que dá pra fazer
 
-- Criar conta
-- Depósito
-- Saque
-- Transferência entre contas (atômica)
-- Bloquear/desbloquear conta
-- Consultar conta e histórico de operações
+- Criar contas bancárias
+- Fazer depósitos e saques
+- Transferir dinheiro entre contas
+- Bloquear e desbloquear contas
+- Ver histórico de todas as operações
 
-O foco está na consistência das regras de negócio, encapsulamento do domínio, clareza do código e testes que validam comportamento real.
+A parte legal é que tudo funciona de forma "atômica" nas transferências - ou tudo dá certo, ou nada muda. E as validações (saldo insuficiente, conta bloqueada, etc) tão todas no lugar certo.
 
-## Arquitetura Adotada
-
-O projeto segue os princípios da **Clean Architecture** de forma leve e pragmática, com separação clara de responsabilidades:
+## Como organizei
 
 ```
 src/main/java/
-├── domain/          → Entidades, value objects e enums do domínio
-├── service/         → Lógica de negócio e casos de uso
-├── repository/      → Interface e implementação in-memory
-├── usecase/         → Orquestração dos fluxos de entrada/saída
-├── dto/             → Objetos de transferência (entrada e saída)
-├── mapper/          → Conversão entre domínio e DTOs
-├── exception/       → Exceções específicas do domínio
-└── util/            → Utilitários auxiliares
+├── domain/          # As regras de negócio vivem aqui
+├── service/         # Lógica das operações bancárias
+├── repository/      # Onde guarda os dados (em memória por enquanto)
+├── usecase/         # Orquestra as operações
+├── dto/             # Objetos pra entrada e saída
+├── mapper/          # Converte entre domínio e DTOs
+├── exception/       # Erros específicos do sistema
+└── util/            # Funções auxiliares
 ```
 
-### Princípios aplicados
+## Por que fiz algumas coisas assim
 
-- **Camadas bem definidas**: nenhuma camada acessa diretamente uma camada mais interna sem passar pela correta.
-- **Domínio protegido**: saldo e histórico só são alterados por métodos comportamentais. Não há setters públicos para campos críticos.
-- **Imutabilidade externa**: o histórico de operações é retornado como visão imutável.
-- **Regra de negócio no lugar certo**: todas as validações (saldo insuficiente, conta bloqueada, valor inválido etc.) estão no domínio ou service.
-- **Sem vazamento de abstrações**: entidades de domínio nunca são expostas — sempre retornamos DTOs.
+**Java puro, sem Spring:** Queria focar nas regras de negócio e entender arquitetura antes de usar frameworks que fazem tudo automaticamente.
 
-## Decisões de Design
+**Repositório em memória:** Isola o domínio. Mais pra frente posso trocar por um banco real sem mexer na lógica.
 
-| Decisão                              | Justificativa                                                                              |
-| ------------------------------------ | ------------------------------------------------------------------------------------------ |
-| Sem frameworks (Spring, Lombok etc.) | Manter o foco total no domínio e nas regras de negócio, sem dependências externas          |
-| Repositório in-memory                | Isolar o domínio de infraestrutura de persistência, facilitando testes e clareza           |
-| Sem mocks nos testes                 | Priorizar testes de comportamento real (estado final), mais confiáveis neste contexto      |
-| Transferência atômica sem transações | Validação completa antes de qualquer alteração — simples, clara e suficiente para o escopo |
-| Exceções customizadas                | Comunicam claramente violações de regras de negócio (não erros técnicos)                   |
-| Uso de records (Java 17)             | Para representar operações do histórico de forma imutável e expressiva                     |
+**Sem setters públicos no saldo:** A conta se protege sozinha. Você não consegue simplesmente mudar o saldo - tem que passar pelas operações de depósito/saque.
 
-## Funcionalidades Implementadas
+**Exceções customizadas:** Quando algo dá errado, o erro diz exatamente qual regra de negócio foi quebrada (tipo "SaldoInsuficienteException"), não um erro genérico.
 
-- Criação de conta com validação de nome
-- Depósito e saque com regras de valor e status
-- Transferência entre contas com:
-  - Validação prévia completa
-  - Atomicidade lógica
-  - Registro detalhado no histórico de ambas as contas (enviada/recebida)
-- Bloqueio e desbloqueio de conta com impacto em todas as operações
-- Consulta de conta e histórico completo (ordenado por data)
-- Tratamento claro de erros via exceções de domínio
+**Records do Java 17:** Usei pra representar as operações no histórico. São imutáveis e deixam o código mais limpo.
+
+## Regras que o sistema garante
+
+- Não dá pra sacar mais do que tem na conta
+- Conta bloqueada não pode fazer operações
+- Transferências são "tudo ou nada" - se der erro, nenhuma conta muda
+- Histórico fica registrado certinho com data/hora
+- Valores precisam ser maiores que zero
 
 ## Testes
 
-Os testes foram escritos com JUnit 5 puro, com foco em **comportamento**:
+Fiz os testes focando no comportamento real, não em mocks. Por exemplo, testo se uma transferência realmente moveu o dinheiro corretamente, se o histórico foi registrado nas duas contas, se dá erro quando deveria dar, etc.
 
-- Cenários de sucesso e falha para todas as operações
-- Validação da atomicidade da transferência (nada muda se validação falhar)
-- Garantia de que conta bloqueada rejeita operações corretamente
-- Imutabilidade do histórico
-- Funcionamento correto do mapper (ida e volta)
-- Fluxos completos (usecase → service → repository)
+Usei JUnit 5 puro, nada muito elaborado. O importante era garantir que as regras de negócio funcionam.
 
-## Como Executar
+## Como rodar
 
-Requisitos:
-
-- JDK 11 ou superior
-- Maven (opcional, mas recomendado)
+Precisa de Java 11+ e Maven.
 
 ```bash
-# Clonar o repositório
-git clone <url-do-seu-repositorio>
-
-# Executar os testes
-./mvnw test    # ou: mvn test
+# Rodar os testes
+mvn test
 
 # Compilar
-./mvnw compile
+mvn compile
 ```
 
-## Reflexões Finais
+## O que aprendi fazendo isso
 
-Este projeto foi pensado para ser **extensível**:
+- Como organizar camadas sem depender de framework
+- Onde colocar cada tipo de validação
+- Como proteger o domínio de mudanças indevidas
+- A importância de testes que validam comportamento real
+- Clean Architecture na prática (sem complicar demais)
 
-- Para adicionar persistência real, bastaria implementar a interface do repositório com JPA ou outro mecanismo.
-- Para expor via API, os use cases poderiam ser chamados por controllers Spring.
-- Para adicionar auditoria, notificações ou logs, poderíamos injetar serviços nas camadas adequadas.
+## Próximos passos (se eu continuar)
 
-O mais importante aqui não é a complexidade técnica, mas a **clareza, consistência e proteção do domínio** — características que tornam um sistema mantenível a longo prazo.
+- Adicionar persistência com JPA
+- Fazer uma API REST por cima
+- Adicionar autenticação e segurança
+- Criar relatórios de movimentação
+- Implementar diferentes tipos de conta (corrente, poupança)
 
-Feedbacks, sugestões e discussões técnicas são muito bem-vindos!
+## Observações
 
----
+Fiz sem frameworks de propósito pra entender os fundamentos. É mais difícil no começo, mas depois fica mais fácil entender o que os frameworks fazem por você.
+
+A ideia é que esse core possa ser usado em qualquer contexto - web, desktop, mobile - porque ele não depende de nada externo.
