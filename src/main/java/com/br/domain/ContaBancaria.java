@@ -2,8 +2,6 @@ package com.br.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import com.br.domain.enums.Status;
 import com.br.exception.ContaBloqueadaException;
 import com.br.exception.SaldoInsuficienteException;
@@ -16,7 +14,6 @@ public class ContaBancaria {
     private BigDecimal saldo;
     private Status status;
     private LocalDateTime criadoAs;
-    private List<Deposito> historico;
 
 
 
@@ -34,7 +31,6 @@ public class ContaBancaria {
         this.saldo = BigDecimal.ZERO;
         this.status = Status.ATIVA;
         this.criadoAs = LocalDateTime.now();
-        this.historico = new ArrayList<>();
     }
 
     public void depositar(BigDecimal valor) {
@@ -48,8 +44,6 @@ public class ContaBancaria {
         }
 
         this.saldo = this.saldo.add(valor);
-
-        // TODO: Atualiza o saldo e registra operação no histórico (tipo: DEPÓSITO).
     }
 
     public void sacar(BigDecimal valor) {
@@ -112,9 +106,6 @@ public class ContaBancaria {
         return this.criadoAs;
     }
 
-    public List<Deposito> getHistorico() {
-        return this.historico;
-    }
 
     @Override
     public int hashCode() {
